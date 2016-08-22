@@ -11,11 +11,9 @@ max_events = 10000
 
 TH1.AddDirectory(False)
 
-
 sub_strs = ['QCD_pp_bbbb_13TeV']
 mc_names = delphes.keys()
 mc_names=[n for n in mc_names if any(s in n for s in sub_strs)]
-
 
 o_dir = "./mixing/" 
 p_par = "ofle={}.root;pName={}"
@@ -24,7 +22,6 @@ for name in mc_names:
     selector = MixingSelector(ExtEvent(DelphesEvent))(0)
     tchain = TChain("Delphes")
     for f in delphes[name]["files"]:
-      print f
       tchain.Add(f)
     print "processing {} sample".format(name)
     if max_events > 0:
