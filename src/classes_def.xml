@@ -1,0 +1,8 @@
+<lcgdict>
+  <class name="DelphesEvent"/>    
+  <class name="ExtEvent<DelphesEvent>"/>    
+  <class name="BaseSelector<ExtEvent<DelphesEvent>>"/>
+  <class name="MixingSelector<ExtEvent<DelphesEvent>>"/>
+  <class name="Hemisphere"/>
+  <class name="std::vector<Hemisphere>"/>
+</lcgdict>  
