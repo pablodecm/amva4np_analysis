@@ -8,6 +8,7 @@
 #include "EventCounter.h"
 #include "JetSelection.h"
 #include "BTagJetSelection.h"
+#include "DiJetPairSelection.h"
 
 
 template <class EventClass> class MixingSelector : public BaseSelector<EventClass> {
@@ -22,8 +23,10 @@ template <class EventClass> class MixingSelector : public BaseSelector<EventClas
       this->addOperator(new EventCounter<EventClass>());
       this->addOperator(new JetSelection<EventClass>(2.5, 20., 4));
       this->addOperator(new EventCounter<EventClass>());
-      this->addOperator(new BTagJetSelection<EventClass>("BTag", 0.500, n_CSV ));
+      this->addOperator(new BTagJetSelection<EventClass>("BTag", 0.5, n_CSV ));
       this->addOperator(new EventCounter<EventClass>());
+      this->addOperator(new BetterDiJetPairSelection<EventClass>("BTag",0.5, n_CSV));
+
 
     }
 
