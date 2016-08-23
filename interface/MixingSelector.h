@@ -9,6 +9,11 @@
 #include "JetSelection.h"
 #include "BTagJetSelection.h"
 #include "DiJetPairSelection.h"
+#include "DiHiggsPlotter.h"
+#include "ThrustAxisFinder.h"
+#include "HemisphereProducer.h"
+#include "FullWriter.h"
+#include "HemisphereWriter.h"
 
 
 template <class EventClass> class MixingSelector : public BaseSelector<EventClass> {
@@ -26,7 +31,12 @@ template <class EventClass> class MixingSelector : public BaseSelector<EventClas
       this->addOperator(new BTagJetSelection<EventClass>("BTag", 0.5, n_CSV ));
       this->addOperator(new EventCounter<EventClass>());
       this->addOperator(new BetterDiJetPairSelection<EventClass>("BTag",0.5, n_CSV));
-
+      this->addOperator(new EventCounter<EventClass>());
+      this->addOperator(new DiHiggsPlotter<EventClass>({}, true));
+      this->addOperator(new ThrustAxisFinder<EventClass>());
+      this->addOperator(new HemisphereProducer<EventClass>());
+      this->addOperator(new FullWriter<EventClass>(true));
+      this->addOperator(new HemisphereWriter<EventClass>(true));
 
     }
 
