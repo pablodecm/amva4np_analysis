@@ -7,7 +7,7 @@ from ROOT import TH1
 
 from amva4np.samples.oxford_summer_2016 import delphes
 
-max_events = 10000
+max_events = -10000
 
 TH1.AddDirectory(False)
 
@@ -15,8 +15,8 @@ sub_strs = ['QCD_pp_bbbb_13TeV']
 mc_names = delphes.keys()
 mc_names=[n for n in mc_names if any(s in n for s in sub_strs)]
 
-o_dir = "./mixing/" 
-p_par = "ofle={}.root;pName={}"
+o_dir = "../datasets/unmixed" 
+p_par = "ofile={}.root;pName={}"
 
 for name in mc_names:
     selector = MixingSelector(ExtEvent(DelphesEvent))(0)
@@ -24,6 +24,7 @@ for name in mc_names:
     for f in delphes[name]["files"]:
       tchain.Add(f)
     print "processing {} sample".format(name)
+    print "total number of events",tchain.GetEntries()
     if max_events > 0:
         tchain.Process(selector, p_par.format(o_dir+name, name), max_events)
     else:

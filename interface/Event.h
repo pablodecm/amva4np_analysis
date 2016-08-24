@@ -39,15 +39,14 @@ class ThinEvent {
     // read from TTree
     mut::Reader<mut::EventInfo> eventInfo_;
     mut::Reader<std::vector<mut::Jet>> jets_;
-    mut::Reader<mut::MET> met_;
+//    mut::Reader<mut::MET> met_;
 
     ThinEvent() {}
 
-    ThinEvent(TTreeReader & reader, std::vector<std::string> hlt_bits, bool isHH = false,
-     bool isData = false, std::vector<std::string> corr_names = {}) :
+    ThinEvent(TTreeReader & reader) :
      eventInfo_(reader, "eventInfo" ),  
-   	 jets_(reader, "pfjets"),
-     met_(reader, "pfmet")
+   	 jets_(reader, "pfjets")
+//     met_(reader, "pfmet")
      {}                   
 
     virtual ~ThinEvent() {};
@@ -55,7 +54,7 @@ class ThinEvent {
     virtual void update() {
       eventInfo_.update();
       jets_.update();
-      met_.update();
+//      met_.update();
     }
 };
 

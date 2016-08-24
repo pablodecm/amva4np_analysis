@@ -64,7 +64,86 @@ inline void dijet_pairing_simple (std::vector<mut::Jet> & jets,
   }  
 }
  
+inline std::vector<std::size_t> dijet_pairing_better(std::vector<mut::Jet> & jets,
+                                 std::string disc, double d_value,
+                                 std::size_t n_min_disc, std::size_t n_pass_disc) {
 
+    typedef std::vector<std::size_t>::iterator It;
+
+
+    // index vector
+    std::vector<std::size_t> jet_is(jets.size());
+    std::iota(jet_is.begin(), jet_is.end(), 0);
+    // index vector of the best combination
+    std::vector<std::size_t> min_is(jet_is.begin(), jet_is.end());
+    double min_v = 100000 ;
+    // to save chosen tagged jets
+    std::vector<std::size_t> tag_is;
+
+    // iterate over all tagged jet combinations 
+    for_each_combination(jet_is.begin(), jet_is.begin()+n_min_disc,
+                         jet_is.begin()+n_pass_disc, [&](It fi, It li) -> bool {
+      std::vector<std::size_t> tag_is_t;                   
+      tag_is_t.insert(tag_is_t.begin(), jet_is.begin(), jet_is.begin()+n_min_disc);
+    	// iterate over all four jet combinations 
+      for_each_combination(jet_is.begin()+n_min_disc, jet_is.begin()+4,
+                           jet_is.end(), [&](It fii, It lii) -> bool {
+        // iterate over all dijet pickings 
+      	for_each_combination(jet_is.begin(), jet_is.begin()+2, 
+                             jet_is.begin()+3, [&](It fiii, It liii) -> bool {
+          // this could be done faster with VectorUtil function                   
+  				double mass_one = (jets.at(*jet_is.begin())+ jets.at(*(jet_is.begin()+1))).M();
+  				double mass_two = (jets.at(*(jet_is.begin()+2))+ jets.at(*(jet_is.begin()+3))).M();
+          double mass_diff = std::abs(mass_one-mass_two);
+          if ( mass_diff < min_v) {
+            tag_is = tag_is_t;
+            min_v = mass_diff; 
+            min_is.clear();
+            if (mass_one > mass_two) {
+              min_is.insert(min_is.begin(), jet_is.begin(), jet_is.end());
+            } else {
+              min_is.insert(min_is.begin(), jet_is.begin()+2, jet_is.begin()+4);
+              min_is.insert(min_is.begin()+2, jet_is.begin(), jet_is.begin()+2);
+              min_is.insert(min_is.begin()+4, jet_is.begin()+4, jet_is.end());
+            }
+          }
+          return false;
+       	});
+        return false;
+      });
+      return false;
+		});
+
+      // the fist pair of elements of the min_is variable are
+      // the indexes of the fist pair and the folowign two
+      // are indexes for the second pair 
+
+      std::vector<std::size_t> free_is;
+      std::vector<std::size_t> sel_is;
+      sel_is.insert(sel_is.begin(), min_is.begin(), min_is.begin()+4);
+      std::sort(tag_is.begin(), tag_is.end());  
+      std::sort(sel_is.begin(), sel_is.end());  
+      std::vector<std::size_t> dif_is;
+      std::set_difference(sel_is.begin(), sel_is.end(),
+                          tag_is.begin(), tag_is.end(),
+                          std::inserter(dif_is, dif_is.begin()));
+      for (const auto & i : dif_is ) {
+        free_is.emplace_back(std::distance(min_is.begin(),
+                                 std::find(min_is.begin(), min_is.end(), i)));
+      }
+
+      // use same order for jet collection (copy overhead as it is now)
+      auto ordered_jets = std::vector<mut::Jet>{}; 
+      for (std::size_t i = 0; i < jets.size(); i++ ) {
+        ordered_jets.emplace_back(jets.at(min_is.at(i)));
+      }
+      for (std::size_t i = 0; i < jets.size(); i++ ) {
+        jets.at(i) = ordered_jets.at(i);
+      }  
+
+      return free_is;
+}
+ 
 template <class EventClass> class DiJetPairSelection : public BaseOperator<EventClass> {
 
   public:
@@ -128,94 +207,22 @@ template <class EventClass> class BetterDiJetPairSelection : public BaseOperator
 
     virtual bool process( EventClass & ev ) {
 
-    // sort in discriminator order 
-    auto comparator = [&](mut::Jet a, mut::Jet b){ 
-      return a.getDiscriminator(disc_) > b.getDiscriminator(disc_); };
-    std::sort(ev.jets_.begin(), ev.jets_.end(), comparator );
-
-    // count n jets which pass discriminator
-    std::size_t n_pass_disc = std::count_if(ev.jets_.begin(),
+      // sort in discriminator order 
+      auto comparator = [&](mut::Jet a, mut::Jet b){ 
+        return a.getDiscriminator(disc_) > b.getDiscriminator(disc_); };
+      std::sort(ev.jets_.begin(), ev.jets_.end(), comparator );
+  
+      // count n jets which pass discriminator
+      std::size_t n_pass_disc = std::count_if(ev.jets_.begin(),
                                             ev.jets_.end(),
                                             [&] (const mut::Jet & jet)
     	 {return (jet.getDiscriminator(disc_) > d_value_);});
-    // event discarded if not enough tagged jets
-    if ( n_pass_disc < n_min_disc_ ) return false;
+      // event discarded if not enough tagged jets
+      if ( n_pass_disc < n_min_disc_) return false;
 
-    // index vector
-    std::vector<std::size_t> jet_is(ev.jets_.size());
-    std::iota(jet_is.begin(), jet_is.end(), 0);
-    // index vector of the best combination
-    std::vector<std::size_t> min_is(jet_is.begin(), jet_is.end());
-    double min_v = 100000 ;
-    // to save chosen tagged jets
-    std::vector<std::size_t> tag_is;
-
-    // iterate over all tagged jet combinations 
-    for_each_combination(jet_is.begin(), jet_is.begin()+n_min_disc_,
-                         jet_is.begin()+n_pass_disc, [&](It fi, It li) -> bool {
-      std::vector<std::size_t> tag_is_t;                   
-      tag_is_t.insert(tag_is_t.begin(), jet_is.begin(), jet_is.begin()+n_min_disc_);
-    	// iterate over all four jet combinations 
-      for_each_combination(jet_is.begin()+n_min_disc_, jet_is.begin()+4,
-                           jet_is.end(), [&](It fii, It lii) -> bool {
-        // iterate over all dijet pickings 
-      	for_each_combination(jet_is.begin(), jet_is.begin()+2, 
-                             jet_is.begin()+3, [&](It fiii, It liii) -> bool {
-          // this could be done faster with VectorUtil function                   
-  				double mass_one = (ev.jets_.at(*jet_is.begin())+ ev.jets_.at(*(jet_is.begin()+1))).M();
-  				double mass_two = (ev.jets_.at(*(jet_is.begin()+2))+ ev.jets_.at(*(jet_is.begin()+3))).M();
-          double mass_diff = std::abs(mass_one-mass_two);
-          if ( mass_diff < min_v) {
-            tag_is = tag_is_t;
-            min_v = mass_diff; 
-            min_is.clear();
-            if (mass_one > mass_two) {
-              min_is.insert(min_is.begin(), jet_is.begin(), jet_is.end());
-            } else {
-              min_is.insert(min_is.begin(), jet_is.begin()+2, jet_is.begin()+4);
-              min_is.insert(min_is.begin()+2, jet_is.begin(), jet_is.begin()+2);
-              min_is.insert(min_is.begin()+4, jet_is.begin()+4, jet_is.end());
-            }
-          }
-          return false;
-       	});
-        return false;
-      });
-      return false;
-		});
-
-      // the fist pair of elements of the min_is variable are
-      // the indexes of the fist pair and the folowign two
-      // are indexes for the second pair 
-
-      std::vector<std::size_t> sel_is;
-      sel_is.insert(sel_is.begin(), min_is.begin(), min_is.begin()+4);
-      std::sort(tag_is.begin(), tag_is.end());  
-      std::sort(sel_is.begin(), sel_is.end());  
-      std::vector<std::size_t> dif_is;
-      std::set_difference(sel_is.begin(), sel_is.end(),
-                          tag_is.begin(), tag_is.end(),
-                          std::inserter(dif_is, dif_is.begin()));
-
-      ev.free_is_.clear();
-      for (const auto & i : dif_is ) {
-        ev.free_is_.emplace_back(std::distance(min_is.begin(),
-                                 std::find(min_is.begin(), min_is.end(), i)));
-      }
+      // return index of free jets
+      ev.free_is_ = dijet_pairing_better(ev.jets_, disc_, d_value_, n_min_disc_, n_pass_disc);
       
-
-
-
-      // use same order for jet collection (copy overhead as it is now)
-      auto ordered_jets = std::vector<mut::Jet>{}; 
-      for (std::size_t i = 0; i < ev.jets_.size(); i++ ) {
-        ordered_jets.emplace_back(ev.jets_.at(min_is.at(i)));
-      }
-      for (std::size_t i = 0; i < ev.jets_.size(); i++ ) {
-        ev.jets_.at(i) = ordered_jets.at(i);
-      }  
-        
-
       // fill dijet objects
       ev.dijets_.clear();
       ev.dijets_.emplace_back(ev.jets_.at(0) + ev.jets_.at(1));

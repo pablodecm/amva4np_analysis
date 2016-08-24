@@ -3,6 +3,12 @@
   <class name="ExtEvent<DelphesEvent>"/>    
   <class name="BaseSelector<ExtEvent<DelphesEvent>>"/>
   <class name="MixingSelector<ExtEvent<DelphesEvent>>"/>
+  <class name="FrankSelector<ExtEvent<DelphesEvent>>"/>
+  <class name="ThinEvent"/>    
+  <class name="ExtEvent<ThinEvent>"/>    
+  <class name="BaseSelector<ExtEvent<ThinEvent>>"/>
+  <class name="MixingSelector<ExtEvent<ThinEvent>>"/>
+  <class name="FrankSelector<ExtEvent<ThinEvent>>"/>
   <class name="Hemisphere"/>
   <class name="std::vector<Hemisphere>"/>
 </lcgdict>  
