@@ -11,11 +11,11 @@ max_events = -10000
 
 TH1.AddDirectory(False)
 
-sub_strs = ['QCD_pp_bbbb_13TeV']
+sub_strs = ['QCD_pp_bbbb_13TeV','pp_hh_bbbb_13TeV']
 mc_names = delphes.keys()
 mc_names=[n for n in mc_names if any(s in n for s in sub_strs)]
 
-o_dir = "../datasets/unmixed" 
+o_dir = "../datasets/unmixed_4btag" 
 p_par = "ofile={}.root;pName={}"
 
 for name in mc_names:

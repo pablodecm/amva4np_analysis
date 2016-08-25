@@ -24,7 +24,7 @@ template <class EventClass> class MixingSelector : public BaseSelector<EventClas
   MixingSelector(TTree * /*tree*/ =0) :
     BaseSelector<EventClass>(0)
     {
-      std::size_t n_CSV = 3;
+      std::size_t n_CSV = 4;
       this->addOperator(new EventCounter<EventClass>());
       this->addOperator(new JetSelection<EventClass>(2.5, 20., 4));
       this->addOperator(new EventCounter<EventClass>());

@@ -29,8 +29,9 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
     std::size_t n_h_skip_;
 
     // to order jets after mixing
-    std::string disc_ = "CSV";
-    std::size_t n_fix_jets_ = 4;
+    std::string disc_ = "BTag";
+    double d_value_ = 0.5;
+    std::size_t n_min_disc_ = 4;
 
     bool root_;
     std::string dir_;
@@ -103,8 +104,16 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
 
           // order by b-tagging disc
           order_jets_by_disc(mix_jets_, disc_);
+          // count n jets which pass discriminator
+          std::size_t n_pass_disc = std::count_if(mix_jets_.begin(),
+                                                  mix_jets_.end(),
+                                                  [&] (const mut::Jet & jet)
+    	      {return (jet.getDiscriminator(disc_) > d_value_);});
+          // event discarded if not enough tagged jets
+          if ( n_pass_disc < n_min_disc_) return false;
+
           // pair with min mass
-          dijet_pairing_simple(mix_jets_, n_fix_jets_);        
+           dijet_pairing_better(mix_jets_, disc_, d_value_, n_min_disc_, n_pass_disc);
 
           // fill tree with combination
           tree_.Fill();
