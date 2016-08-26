@@ -20,9 +20,10 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
     // variables to save in branches
     mut::EventInfo * eventInfo = nullptr;
     std::vector<mut::Jet> mix_jets_;
+    std::vector<mut::Candidate> mix_dijets_;
     // a pointer to avoid undecalred label
-    std::vector<mut::Jet> * mix_jets_ptr_;
-    mut::MET * pfmet = nullptr;
+    std::vector<mut::Jet> * mix_jets_ptr_ = nullptr;
+    std::vector<mut::Candidate> * mix_dijets_ptr_ = nullptr;
 
     // hemisphere combinations to save
     std::size_t n_h_mix_;
@@ -42,6 +43,7 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
      FrankWriter(std::size_t n_h_mix = 1, std::size_t n_h_skip = 1,
                 bool root = false, std::string dir = "") :
       mix_jets_ptr_(&mix_jets_),  
+      mix_dijets_ptr_(&mix_dijets_),  
       n_h_mix_(n_h_mix),
       n_h_skip_(n_h_skip), 
       root_(root),
@@ -62,8 +64,8 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
                    &eventInfo, 64000, 1);
       tree_.Branch("pfjets","std::vector<mut::Jet>",
                    &mix_jets_ptr_, 64000, 1);
-//      tree_.Branch("pfmet","mut::MET",
-//                   &pfmet, 64000, 1);
+      tree_.Branch("dijets","std::vector<mut::Candidate>",
+                   &mix_dijets_ptr_, 64000, 1);
 
 
       tree_.SetDirectory(tdir);
@@ -77,7 +79,6 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
 
       // most stuff from original event
       eventInfo = dynamic_cast<mut::EventInfo *>(&ev.eventInfo_);
-//      pfmet = dynamic_cast<mut::MET *>(&ev.met_);
 
       const auto & bm_hems = ev.best_match_hems_;
 
@@ -113,9 +114,13 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
           if ( n_pass_disc < n_min_disc_) return false;
 
           // pair with min mass
-           dijet_pairing_better(mix_jets_, disc_, d_value_, n_min_disc_, n_pass_disc);
+          dijet_pairing_better(mix_jets_, disc_, d_value_, n_min_disc_, n_pass_disc);
 
-          // fill tree with combination
+          // set dijets
+          mix_dijets_.clear();
+          mix_dijets_.emplace_back(ev.jets_.at(0) + ev.jets_.at(1));
+          mix_dijets_.emplace_back(ev.jets_.at(2) + ev.jets_.at(3));
+          //  fill tree with combination
           tree_.Fill();
         }
       }

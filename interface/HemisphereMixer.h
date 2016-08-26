@@ -144,7 +144,7 @@ template <class EventClass> class HemisphereMixer : public BaseOperator<EventCla
                                             return ( nJets > 3 ? 4 : nJets);
                                           }),
                                           FuncI( [] (const Hemisphere & hem) {
-                                            int nTags = Hemisphere::nTags(hem, "CSV", 0.8);
+                                            int nTags = Hemisphere::nTags(hem, "BTag", 0.5);
                                             return ( nTags > 3 ? 4 : nTags);
                                           })},
                      FuncDVec funcDVec = { FuncD(&Hemisphere::thrustMayor),

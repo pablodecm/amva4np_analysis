@@ -19,6 +19,7 @@ template <class EventClass> class FullWriter : public BaseOperator<EventClass> {
     // variables to save in branches
     mut::EventInfo * eventInfo = nullptr;
     std::vector<mut::Jet> * pfjets = nullptr;
+    std::vector<mut::Candidate> * dijets = nullptr;
     mut::MET * pfmet = nullptr;
 
     TTree tree_{"tree","Tree using simplified mut::dataformats"};
@@ -42,8 +43,9 @@ template <class EventClass> class FullWriter : public BaseOperator<EventClass> {
                    &eventInfo, 64000, 1);
       tree_.Branch("pfjets","std::vector<mut::Jet>",
                    &pfjets, 64000, 1);
-//      tree_.Branch("pfmet","mut::MET",
-//                   &pfmet, 64000, 1);
+
+      tree_.Branch("dijets","std::vector<mut::Candidate>",
+                   &dijets, 64000, 1);
 
       tree_.SetDirectory(tdir);
       tree_.AutoSave();
@@ -53,11 +55,14 @@ template <class EventClass> class FullWriter : public BaseOperator<EventClass> {
 
     virtual bool process( EventClass & ev ) {
 
-
-      // to fill tree redirect pointers
+      // set dijets
+      ev.dijets_.clear();
+      ev.dijets_.emplace_back(ev.jets_.at(0) + ev.jets_.at(1));
+      ev.dijets_.emplace_back(ev.jets_.at(2) + ev.jets_.at(3));
+      // redirect pointers
       eventInfo = dynamic_cast<mut::EventInfo *>(&ev.eventInfo_);
       pfjets = dynamic_cast<std::vector<mut::Jet> *>(&ev.jets_); 
-//      pfmet = dynamic_cast<mut::MET *>(&ev.met_);
+      dijets = dynamic_cast<std::vector<mut::Candidate> *>(&ev.dijets_); 
 
       tree_.Fill();
 

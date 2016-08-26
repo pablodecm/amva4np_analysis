@@ -14,7 +14,7 @@ base_dir = "../datasets/mixed/"
 thinEventPath = "../datasets/unmixed_4btag/"
 names = ["QCD_pp_bbbb_13TeV","pp_hh_bbbb_13TeV"]
 fraction = [0.874,5.668e-6]
-times_sm = [1., 1000.] 
+times_sm = [1., 5000.] 
 mult = 5
 
 
@@ -45,5 +45,5 @@ tc_hm.SetEventList(el)
 tchain.SetEventList(el)
 selector = FrankSelector(ExtEvent(ThinEvent))(0, tc_hm, mult)
 print "selector created"
-tchain.Process(selector, "ofile="+base_dir+name+"_times_sm_"+str(int(times_sm[1]))+".root", max_events)
+tchain.Process(selector, "ofile="+base_dir+"mixed_times_sm_"+str(int(times_sm[1]))+".root", max_events)
 
