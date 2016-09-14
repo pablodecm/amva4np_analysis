@@ -19,10 +19,12 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
  
     // variables to save in branches
     mut::EventInfo * eventInfo = nullptr;
-    std::vector<mut::Jet> mix_jets_;
-    std::vector<mut::Candidate> mix_dijets_;
+    std::vector<mut::Jet> mix_jets_ = {};
+    std::vector<mut::Jet> mix_jets_by_pt_ = {};
+    std::vector<mut::Candidate> mix_dijets_ = {};
     // a pointer to avoid undecalred label
     std::vector<mut::Jet> * mix_jets_ptr_ = nullptr;
+    std::vector<mut::Jet> * mix_jets_by_pt_ptr_ = nullptr;
     std::vector<mut::Candidate> * mix_dijets_ptr_ = nullptr;
 
     // hemisphere combinations to save
@@ -43,6 +45,7 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
      FrankWriter(std::size_t n_h_mix = 1, std::size_t n_h_skip = 1,
                 bool root = false, std::string dir = "") :
       mix_jets_ptr_(&mix_jets_),  
+      mix_jets_by_pt_ptr_(&mix_jets_by_pt_),  
       mix_dijets_ptr_(&mix_dijets_),  
       n_h_mix_(n_h_mix),
       n_h_skip_(n_h_skip), 
@@ -64,6 +67,8 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
                    &eventInfo, 64000, 1);
       tree_.Branch("pfjets","std::vector<mut::Jet>",
                    &mix_jets_ptr_, 64000, 1);
+      tree_.Branch("pfjets_by_pt","std::vector<mut::Jet>",
+                   &mix_jets_by_pt_ptr_, 64000, 1);
       tree_.Branch("dijets","std::vector<mut::Candidate>",
                    &mix_dijets_ptr_, 64000, 1);
 
@@ -102,6 +107,11 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
           mix_jets_.insert(mix_jets_.end(), jets_i.begin(), jets_i.end());
           mix_jets_.insert(mix_jets_.end(), jets_j.begin(), jets_j.end());
 
+          // order by pt for consitency
+          auto pt_comparator = [&](const mut::Jet & a, const mut::Jet & b ){ return a.Pt() > b.Pt(); };
+          std::sort(mix_jets_.begin(), mix_jets_.end(), pt_comparator);
+          // copy collection to keeep order by pt (other would be paired)
+          mix_jets_by_pt_ = mix_jets_;
 
           // order by b-tagging disc
           order_jets_by_disc(mix_jets_, disc_);
@@ -118,8 +128,8 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
 
           // set dijets
           mix_dijets_.clear();
-          mix_dijets_.emplace_back(ev.jets_.at(0) + ev.jets_.at(1));
-          mix_dijets_.emplace_back(ev.jets_.at(2) + ev.jets_.at(3));
+          mix_dijets_.emplace_back(mix_jets_.at(0) + mix_jets_.at(1));
+          mix_dijets_.emplace_back(mix_jets_.at(2) + mix_jets_.at(3));
           //  fill tree with combination
           tree_.Fill();
         }

@@ -70,7 +70,6 @@ inline std::vector<std::size_t> dijet_pairing_better(std::vector<mut::Jet> & jet
 
     typedef std::vector<std::size_t>::iterator It;
 
-
     // index vector
     std::vector<std::size_t> jet_is(jets.size());
     std::iota(jet_is.begin(), jet_is.end(), 0);
@@ -80,8 +79,6 @@ inline std::vector<std::size_t> dijet_pairing_better(std::vector<mut::Jet> & jet
     // to save chosen tagged jets
     std::vector<std::size_t> tag_is;
 
-    for (const auto & jet : jets) std::cout << jet.getDiscriminator("BTag") ;
-    std::cout << "" << std::endl;
     // iterate over all tagged jet combinations 
     for_each_combination(jet_is.begin(), jet_is.begin()+n_min_disc,
                          jet_is.begin()+n_pass_disc, [&](It fi, It li) -> bool {
@@ -93,14 +90,10 @@ inline std::vector<std::size_t> dijet_pairing_better(std::vector<mut::Jet> & jet
         // iterate over all dijet pickings 
       	for_each_combination(jet_is.begin(), jet_is.begin()+2, 
                              jet_is.begin()+3, [&](It fiii, It liii) -> bool {
-          std::cout << "jet is" << jet_is << std::endl;
           // this could be done faster with VectorUtil function                   
   				double mass_one = (jets.at(*jet_is.begin())+ jets.at(*(jet_is.begin()+1))).M();
   				double mass_two = (jets.at(*(jet_is.begin()+2))+ jets.at(*(jet_is.begin()+3))).M();
           double mass_diff = std::abs(mass_one-mass_two);
-          std::cout << "mass diff " << mass_diff << std::endl;
-          std::cout << "mass one " << mass_one << std::endl;
-          std::cout << "mass two " << mass_two << std::endl;
           if ( mass_diff < min_v) {
             tag_is = tag_is_t;
             min_v = mass_diff; 
@@ -120,8 +113,6 @@ inline std::vector<std::size_t> dijet_pairing_better(std::vector<mut::Jet> & jet
       return false;
 		});
     
-      std::cout << "min is" << min_is << std::endl;
-
       // the fist pair of elements of the min_is variable are
       // the indexes of the fist pair and the folowign two
       // are indexes for the second pair 

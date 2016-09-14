@@ -6,6 +6,7 @@
 #include "JetCollection.h"
 #include "EventInfo.h"
 #include "Hemisphere.h"
+#include "GenParticleCollection.h"
 
 #include "mut_framework/mut_dataformats/interface/Reader.h"
 #include "mut_framework/mut_dataformats/interface/MET.h"
@@ -16,12 +17,14 @@ class DelphesEvent {
     // read from TTree
     EventInfo eventInfo_;
     JetCollection jets_;
+    GenParticleCollection b_quarks_;
 
     DelphesEvent() {}
 
     DelphesEvent(TTreeReader & reader) :
      eventInfo_(reader),  
-   	 jets_(reader)
+   	 jets_(reader),
+     b_quarks_(reader, "Particle", false)
      {}                   
 
     virtual ~DelphesEvent() {};
@@ -29,6 +32,7 @@ class DelphesEvent {
     virtual void update() {
       eventInfo_.update();
       jets_.update();
+      b_quarks_.update();
     }
 
 };
@@ -39,14 +43,14 @@ class ThinEvent {
     // read from TTree
     mut::Reader<mut::EventInfo> eventInfo_;
     mut::Reader<std::vector<mut::Jet>> jets_;
-//    mut::Reader<mut::MET> met_;
+    mut::Reader<std::vector<mut::Candidate>> b_quarks_;
 
     ThinEvent() {}
 
     ThinEvent(TTreeReader & reader) :
      eventInfo_(reader, "eventInfo" ),  
-   	 jets_(reader, "pfjets")
-//     met_(reader, "pfmet")
+   	 jets_(reader, "pfjets"),
+     b_quarks_(reader, "b_quarks")
      {}                   
 
     virtual ~ThinEvent() {};
@@ -54,7 +58,7 @@ class ThinEvent {
     virtual void update() {
       eventInfo_.update();
       jets_.update();
-//      met_.update();
+      b_quarks_.update();
     }
 };
 

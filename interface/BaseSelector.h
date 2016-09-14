@@ -133,7 +133,7 @@ template <class EventClass> bool  BaseSelector<EventClass>::Process(Long64_t ent
 {
 
   n_entries++;
-  if ((n_entries%100000) == 0) std::cout << "processing " << n_entries << " entry" << std::endl; 
+  if ((n_entries%10000) == 0) std::cout << "processing " << n_entries << " entry" << std::endl; 
 
   // set TTreeReader entry
   reader_.SetLocalEntry(entry);
