@@ -268,9 +268,9 @@ template <class EventClass> class HemisphereMixer : public BaseOperator<EventCla
         }
 
         std::vector<std::size_t> index_nns(knn_);
-        std::vector<double> dist_nns(knn_);
+        //std::vector<double> dist_nns(knn_);
         // query kdtree
-        index_m_.at(h_cat)->knnSearch(&h_vars[0], knn_, &index_nns[0], &dist_nns[0]);
+        index_m_.at(h_cat)->knnSearch(&h_vars[0], knn_, &index_nns[0], &ev.best_match_distances_);
         // vector of hemispheres corresponding to category 
         const auto & hem_v = hem_m_.at(h_cat); 
         for (std::size_t h_f = 0; h_f < knn_; h_f++) { 
