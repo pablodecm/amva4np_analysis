@@ -88,7 +88,7 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
 
       // most stuff from original event
       eventInfo = dynamic_cast<mut::EventInfo *>(&ev.eventInfo_);
-      best_match_distances_ptr_ = dynamic_cast<double *>(&ev.best_match_distances_);
+      best_match_distances_ptr_ = dynamic_cast<std::vector<std::vector<double>> *>(&ev.best_match_distances_);
 
       const auto & bm_hems = ev.best_match_hems_;
 
