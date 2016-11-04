@@ -22,12 +22,12 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
     std::vector<mut::Jet> mix_jets_ = {};
     std::vector<mut::Jet> mix_jets_by_pt_ = {};
     std::vector<mut::Candidate> mix_dijets_ = {};
-    std::vector<double> best_match_distances_ = {};
+    //std::vector<std::vector<double>> best_match_distances_ = {};
     // a pointer to avoid undecalred label
     std::vector<mut::Jet> * mix_jets_ptr_ = nullptr;
     std::vector<mut::Jet> * mix_jets_by_pt_ptr_ = nullptr;
     std::vector<mut::Candidate> * mix_dijets_ptr_ = nullptr;
-    std::vector<double> * best_match_distances_ptr_ = nullptr;
+    std::vector<std::vector<double>> * best_match_distances_ptr_ = nullptr;
 
     // hemisphere combinations to save
     std::size_t n_h_mix_;
@@ -49,7 +49,6 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
       mix_jets_ptr_(&mix_jets_),  
       mix_jets_by_pt_ptr_(&mix_jets_by_pt_),  
       mix_dijets_ptr_(&mix_dijets_),  
-      best_match_distances_ptr_(&best_match_distances_),
       n_h_mix_(n_h_mix),
       n_h_skip_(n_h_skip), 
       root_(root),
@@ -74,7 +73,7 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
                    &mix_jets_by_pt_ptr_, 64000, 1);
       tree_.Branch("dijets","std::vector<mut::Candidate>",
                    &mix_dijets_ptr_, 64000, 1);
-      tree_.Branch("distances_","std::vector<double>",
+      tree_.Branch("distances_","std::vector<std::vector<double>>",
                    &best_match_distances_ptr_, 64000, 1);
 
 
@@ -89,9 +88,9 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
 
       // most stuff from original event
       eventInfo = dynamic_cast<mut::EventInfo *>(&ev.eventInfo_);
+      best_match_distances_ptr_ = dynamic_cast<double *>(&ev.best_match_distances_);
 
       const auto & bm_hems = ev.best_match_hems_;
-      const auto & bm_dist = ev.best_match_distances_;
 
       // for each hemisphere i
       for (std::size_t h_i=n_h_skip_; h_i<(n_h_skip_+n_h_mix_); h_i++) {
@@ -105,20 +104,13 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
 
           // clear jet collection
           mix_jets_.clear();
-	  best_match_distances_.clear();
-	  
+
           // references for easy access
           const auto jets_i = bm_hems.at(0).at(h_i).jets_;
           const auto jets_j = bm_hems.at(1).at(h_j).jets_;
           mix_jets_.insert(mix_jets_.end(), jets_i.begin(), jets_i.end());
           mix_jets_.insert(mix_jets_.end(), jets_j.begin(), jets_j.end());
 
-          const auto dist_i = bm_dist.at(0).at(h_i);
-          const auto dist_j = bm_dist.at(1).at(h_j);
-          best_match_distances_.insert(best_match_distances_.end(), dist_i.begin(), dist_i.end());
-          best_match_distances_.insert(best_match_distances_.end(), dist_j.begin(), dist_j.end());
-
-	  
 
          // order by pt for consitency
           auto pt_comparator = [&](const mut::Jet & a, const mut::Jet & b ){ return a.Pt() > b.Pt(); };
