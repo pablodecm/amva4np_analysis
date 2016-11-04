@@ -77,6 +77,8 @@ template <class EventBase> class ExtEvent : public EventBase {
   std::vector<Hemisphere> hems_; 
   // best matching hemispheres ( [first/second][proximity])
   std::vector<std::vector<Hemisphere>> best_match_hems_; 
+  // matching distance ( [first/second][proximity])
+  std::vector<std::vector<double>> best_match_distances_; 
 
   // inherit constructors
   using EventBase::EventBase;
@@ -90,6 +92,7 @@ template <class EventBase> class ExtEvent : public EventBase {
     thrust_phi_ = -1.;
     hems_.clear();
     best_match_hems_.clear();
+    best_match_distances_.clear();
   }
 
 };

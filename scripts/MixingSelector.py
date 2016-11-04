@@ -7,7 +7,7 @@ from ROOT import TH1
 
 from amva4np.samples.oxford_summer_2016 import delphes
 
-max_events = -100000
+max_events = 1000
 
 TH1.AddDirectory(False)
 

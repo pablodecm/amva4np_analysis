@@ -41,10 +41,11 @@ max_events = 100000000
 
 TH1.AddDirectory(False)
 
-base_dir = "../datasets/mixed/"
+base_dir = "../datasets/mixed_nn/"
 thinEventPath = "../datasets/unmixed_4btag_pt30/"
 names = ["QCD_pp_bbbb_13TeV","pp_hh_bbbb_13TeV_new"]
-fraction = [0.874,5.668e-6]
+#fraction = [0.874,5.668e-6]
+fraction = [0.874, 0]
 lumi_frac = 5.0
 lumi_factor = args.lumi_factor 
 lumi = lumi_frac*lumi_factor
@@ -87,5 +88,5 @@ ofile+= "mixed_{}_invfb_{}_times_sm_{}_mult_{}_nn_vars{}.root".format(lumi, time
 tchain.Process(selector, "ofile="+ofile, max_events)
 
 
-check_mixed_data(ofile, mult)
+#check_mixed_data(ofile, mult)
 

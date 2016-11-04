@@ -22,10 +22,12 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
     std::vector<mut::Jet> mix_jets_ = {};
     std::vector<mut::Jet> mix_jets_by_pt_ = {};
     std::vector<mut::Candidate> mix_dijets_ = {};
+    //std::vector<std::vector<double>> best_match_distances_ = {};
     // a pointer to avoid undecalred label
     std::vector<mut::Jet> * mix_jets_ptr_ = nullptr;
     std::vector<mut::Jet> * mix_jets_by_pt_ptr_ = nullptr;
     std::vector<mut::Candidate> * mix_dijets_ptr_ = nullptr;
+    std::vector<std::vector<double>> * best_match_distances_ptr_ = nullptr;
 
     // hemisphere combinations to save
     std::size_t n_h_mix_;
@@ -71,6 +73,8 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
                    &mix_jets_by_pt_ptr_, 64000, 1);
       tree_.Branch("dijets","std::vector<mut::Candidate>",
                    &mix_dijets_ptr_, 64000, 1);
+      tree_.Branch("distances_","std::vector<std::vector<double>>",
+                   &best_match_distances_ptr_, 64000, 1);
 
 
       tree_.SetDirectory(tdir);
@@ -84,9 +88,9 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
 
       // most stuff from original event
       eventInfo = dynamic_cast<mut::EventInfo *>(&ev.eventInfo_);
+      best_match_distances_ptr_ = dynamic_cast<std::vector<std::vector<double>> *>(&ev.best_match_distances_);
 
       const auto & bm_hems = ev.best_match_hems_;
-
 
       // for each hemisphere i
       for (std::size_t h_i=n_h_skip_; h_i<(n_h_skip_+n_h_mix_); h_i++) {
@@ -107,7 +111,8 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
           mix_jets_.insert(mix_jets_.end(), jets_i.begin(), jets_i.end());
           mix_jets_.insert(mix_jets_.end(), jets_j.begin(), jets_j.end());
 
-          // order by pt for consitency
+
+         // order by pt for consitency
           auto pt_comparator = [&](const mut::Jet & a, const mut::Jet & b ){ return a.Pt() > b.Pt(); };
           std::sort(mix_jets_.begin(), mix_jets_.end(), pt_comparator);
           // copy collection to keeep order by pt (other would be paired)
