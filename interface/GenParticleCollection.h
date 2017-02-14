@@ -28,6 +28,9 @@
       TTreeReaderArray<int> * gen_particle_d1s_;
       TTreeReaderArray<int> * gen_particle_d2s_;
 
+      // flag to use after pythia or tree level objects
+      bool after_radiation_ = false;
+
       GenParticleCollection() :
         gen_particle_pts_(nullptr),
         gen_particle_etas_(nullptr),
@@ -37,7 +40,9 @@
       {
       }
       
-      GenParticleCollection(TTreeReader & reader, std::string obj_name, bool load = false)
+      GenParticleCollection(TTreeReader & reader, std::string obj_name,
+                            bool load = false, bool after_radiation = false) :
+        after_radiation_(after_radiation)
     {
       if (load) { 
         gen_particle_pts_   = new TTreeReaderArray<float>(reader, (obj_name+".PT").c_str());
@@ -93,18 +98,19 @@
             }
           }
 
-         // check if element is b or bbar
-         std::vector<int>::iterator it = std::find(b_ids.begin(), b_ids.end(), i);
-         if (it != b_ids.end())  { // it is a Higgs decay
-            if ((*gen_particle_d1s_)[i] != (*gen_particle_d2s_)[i])  {
-              *it = i; // is final b/bquark
-            } else {
-              *it = (*gen_particle_d1s_)[i];
-            }
+         if (after_radiation_) {
+           // check if element is b or bbar
+           std::vector<int>::iterator it = std::find(b_ids.begin(), b_ids.end(), i);
+           if (it != b_ids.end())  { // it is a Higgs decay
+              if ((*gen_particle_d1s_)[i] != (*gen_particle_d2s_)[i])  {
+                *it = i; // is final b/bquark
+              } else {
+                *it = (*gen_particle_d1s_)[i];
+              }
+           }
          }
-
-          
         }
+
         // iterate over particles in order 
         for (const auto & i : b_ids) {
           PtEtaPhiMVector gen_particle_lv((*gen_particle_pts_)[i],
