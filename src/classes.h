@@ -4,6 +4,7 @@
 #include "amva4np/analysis/interface/FrankSelector.h"
 #include "amva4np/analysis/interface/Event.h"
 #include "amva4np/analysis/interface/Hemisphere.h"
+#include "amva4np/analysis/interface/METCollection.h"
 
 
 namespace {
@@ -16,5 +17,6 @@ namespace {
     ExtEvent<ThinEvent> dummyb1; 
     MixingSelector<ExtEvent<ThinEvent>> dummyb2;
     FrankSelector<ExtEvent<ThinEvent>> dummyb3;
+    std::vector<std::set<std::size_t>> dummyc; 
   };
 }

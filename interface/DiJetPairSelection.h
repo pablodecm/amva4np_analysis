@@ -160,9 +160,9 @@ template <class EventClass> class DiJetPairSelection : public BaseOperator<Event
       dijet_pairing_simple(ev.jets_, n_fix_jets_);        
 
       // fill dijet objects
-      ev.dijets_.clear();
-      ev.dijets_.emplace_back(ev.jets_.at(0) + ev.jets_.at(1));
-      ev.dijets_.emplace_back(ev.jets_.at(2) + ev.jets_.at(3));
+      ev.higgs_.clear();
+      ev.higgs_.emplace_back(ev.jets_.at(0), ev.jets_.at(1));
+      ev.higgs_.emplace_back(ev.jets_.at(2), ev.jets_.at(3));
 
       std::string disc_ = "CSV";
 
@@ -223,9 +223,9 @@ template <class EventClass> class BetterDiJetPairSelection : public BaseOperator
       ev.free_is_ = dijet_pairing_better(ev.jets_, disc_, d_value_, n_min_disc_, n_pass_disc);
       
       // fill dijet objects
-      ev.dijets_.clear();
-      ev.dijets_.emplace_back(ev.jets_.at(0) + ev.jets_.at(1));
-      ev.dijets_.emplace_back(ev.jets_.at(2) + ev.jets_.at(3));
+      ev.higgs_.clear();
+      ev.higgs_.emplace_back(ev.jets_.at(0), ev.jets_.at(1));
+      ev.higgs_.emplace_back(ev.jets_.at(2), ev.jets_.at(3));
 
       return true;
     }
@@ -262,8 +262,8 @@ template <class EventClass> class WithinEllipse : public BaseOperator<EventClass
     virtual bool process( EventClass & ev ) {
 
       // get mass coordinates
-      double x{ev.dijets_.at(0).mass()};
-      double y{ev.dijets_.at(1).mass()};
+      double x{ev.higgs_.at(0).mass()};
+      double y{ev.higgs_.at(1).mass()};
 
       // translate
       x -= x_c_;
@@ -308,8 +308,8 @@ template <class EventClass> class WithinRectangle: public BaseOperator<EventClas
     virtual bool process( EventClass & ev ) {
 
       // get mass coordinates
-      double x{ev.dijets_.at(0).mass()};
-      double y{ev.dijets_.at(1).mass()};
+      double x{ev.higgs_.at(0).mass()};
+      double y{ev.higgs_.at(1).mass()};
 
       // check if in rectangle 
       bool inRectangle{ (x > x_min_) && (x < x_max_) && (y > y_min_) && (y < y_max_)}; 

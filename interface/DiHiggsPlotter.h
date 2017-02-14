@@ -96,23 +96,23 @@ template <class EventClass> class DiHiggsPlotter : public BaseOperator<EventClas
         }
       }
 
-      h_H0_mass.Fill(ev.dijets_.at(0).mass(), w);
-      h_H0_pt.Fill(ev.dijets_.at(0).pt(), w);
-      h_H0_eta.Fill(ev.dijets_.at(0).eta(), w);
-      h_H1_mass.Fill(ev.dijets_.at(1).mass(), w);
-      h_H1_pt.Fill(ev.dijets_.at(1).pt(), w);
-      h_H1_eta.Fill(ev.dijets_.at(1).eta(), w);
-      h_H0_H1_mass.Fill(ev.dijets_.at(0).mass(), ev.dijets_.at(1).mass(), w);
-      h_H0H1_mass.Fill((ev.dijets_.at(0)+ev.dijets_.at(1)).mass(), w);
+      h_H0_mass.Fill(ev.higgs_.at(0).mass(), w);
+      h_H0_pt.Fill(ev.higgs_.at(0).pt(), w);
+      h_H0_eta.Fill(ev.higgs_.at(0).eta(), w);
+      h_H1_mass.Fill(ev.higgs_.at(1).mass(), w);
+      h_H1_pt.Fill(ev.higgs_.at(1).pt(), w);
+      h_H1_eta.Fill(ev.higgs_.at(1).eta(), w);
+      h_H0_H1_mass.Fill(ev.higgs_.at(0).mass(), ev.higgs_.at(1).mass(), w);
+      h_H0H1_mass.Fill((ev.higgs_.at(0)+ev.higgs_.at(1)).mass(), w);
 
-      h_H0_mass_unc_sq.Fill(ev.dijets_.at(0).mass(), w_unc_sq);
-      h_H0_pt_unc_sq.Fill(ev.dijets_.at(0).pt(), w_unc_sq);
-      h_H0_eta_unc_sq.Fill(ev.dijets_.at(0).eta(), w_unc_sq);
-      h_H1_mass_unc_sq.Fill(ev.dijets_.at(1).mass(), w_unc_sq);
-      h_H1_pt_unc_sq.Fill(ev.dijets_.at(1).pt(), w_unc_sq);
-      h_H1_eta_unc_sq.Fill(ev.dijets_.at(1).eta(), w_unc_sq);
-      h_H0_H1_mass_unc_sq.Fill(ev.dijets_.at(0).mass(), ev.dijets_.at(1).mass(), w_unc_sq);
-      h_H0H1_mass_unc_sq.Fill((ev.dijets_.at(0)+ev.dijets_.at(1)).mass(), w_unc_sq);
+      h_H0_mass_unc_sq.Fill(ev.higgs_.at(0).mass(), w_unc_sq);
+      h_H0_pt_unc_sq.Fill(ev.higgs_.at(0).pt(), w_unc_sq);
+      h_H0_eta_unc_sq.Fill(ev.higgs_.at(0).eta(), w_unc_sq);
+      h_H1_mass_unc_sq.Fill(ev.higgs_.at(1).mass(), w_unc_sq);
+      h_H1_pt_unc_sq.Fill(ev.higgs_.at(1).pt(), w_unc_sq);
+      h_H1_eta_unc_sq.Fill(ev.higgs_.at(1).eta(), w_unc_sq);
+      h_H0_H1_mass_unc_sq.Fill(ev.higgs_.at(0).mass(), ev.higgs_.at(1).mass(), w_unc_sq);
+      h_H0H1_mass_unc_sq.Fill((ev.higgs_.at(0)+ev.higgs_.at(1)).mass(), w_unc_sq);
 
       return true;
     }
