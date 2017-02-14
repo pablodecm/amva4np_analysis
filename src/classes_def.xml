@@ -11,4 +11,5 @@
   <class name="FrankSelector<ExtEvent<ThinEvent>>"/>
   <class name="Hemisphere"/>
   <class name="std::vector<Hemisphere>"/>
+  <class name="std::vector<std::set<std::size_t>>"/> 
 </lcgdict>  

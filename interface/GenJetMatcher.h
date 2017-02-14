@@ -110,7 +110,33 @@ template <class EventClass> class HHJetsMatched : public BaseOperator<EventClass
           return false; 
         }
       }
-      return higgs_jet_is.empty();
+      if (higgs_jet_is.empty()) {
+
+        // reorder b hadrons to match dijet ordering
+        std::vector<mut::Candidate> or_b_quarks;
+        for (const auto & pair_is : dijets_is_) {
+          for (const auto & j_i : pair_is) {
+            or_b_quarks.emplace_back(ev.b_quarks_.at(*matchs.at(j_i).begin()));
+          } 
+        }
+
+        //use right ordering
+        ev.b_quarks_.clear();
+        for (const auto & b_quark : or_b_quarks) {
+          ev.b_quarks_.emplace_back(b_quark);
+        }
+
+        // fill gen objects just in case
+        ev.gen_higgs_.clear();
+        ev.gen_higgs_.emplace_back(ev.b_quarks_.at(0),ev.b_quarks_.at(1));
+        ev.gen_higgs_.emplace_back(ev.b_quarks_.at(2),ev.b_quarks_.at(3));
+        ev.gen_dihiggs_.clear();
+        ev.gen_dihiggs_.emplace_back(ev.gen_higgs_.at(0), ev.gen_higgs_.at(1));
+
+        return true; // event passes
+      } else {
+        return false; // event does not pass
+      }
     }
 
     virtual std::string get_name() {
