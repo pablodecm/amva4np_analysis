@@ -124,7 +124,8 @@ template <class EventClass> class FrankWriter : public BaseOperator<EventClass> 
           if ( n_pass_disc < n_min_disc_) return false;
 
           // pair with min mass
-          dijet_pairing_better(mix_jets_, disc_, d_value_, n_min_disc_, n_pass_disc);
+          bool pt_order = true; // order by higgs pt
+          dijet_pairing_better(mix_jets_, disc_, d_value_, n_min_disc_, n_pass_disc, pt_order);
 
           // set dijets
           mix_dijets_.clear();

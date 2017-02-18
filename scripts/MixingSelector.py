@@ -11,12 +11,12 @@ max_events = -1
 
 TH1.AddDirectory(False)
 
-sub_strs = ['QCD_pp_bbbb_13TeV','pp_hh_bbbb_13TeV']
-sub_strs = ['pp_hh_bbbb_13TeV']
+sub_strs = ['QCD_pp_bbbb_13TeV']
+#sub_strs = ['pp_hh_bbbb_13TeV']
 mc_names = delphes.keys()
 mc_names=[n for n in mc_names if any(s in n for s in sub_strs)]
 
-o_dir = "../datasets/with_gen_info_pre_radiation/" 
+o_dir = "../datasets/with_gen_info_pre_radiation_pt_order_all/" 
 p_par = "ofile={}.root;pName={}"
 
 for name in mc_names:
