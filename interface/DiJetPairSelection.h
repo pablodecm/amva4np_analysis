@@ -14,7 +14,7 @@
 
 
 inline void dijet_pairing_simple (std::vector<mut::Jet> & jets,
-                           std::size_t n_fix_jets) {
+                           std::size_t n_fix_jets, bool pt_order) {
 
   typedef std::vector<std::size_t>::iterator It;
 
@@ -31,19 +31,29 @@ inline void dijet_pairing_simple (std::vector<mut::Jet> & jets,
   	for_each_combination(jet_is.begin(), jet_is.begin()+2, 
                          jet_is.begin()+3, [&](It fi, It li) -> bool {
       // this could be done faster with VectorUtil function                   
-  		double mass_one = (jets.at(*jet_is.begin())+ jets.at(*(jet_is.begin()+1))).M();
-  		double mass_two = (jets.at(*(jet_is.begin()+2))+ jets.at(*(jet_is.begin()+3))).M();
-      double mass_diff = std::abs(mass_one-mass_two);
+  		auto vec_one = (jets.at(*jet_is.begin())+ jets.at(*(jet_is.begin()+1)));
+  		auto vec_two = (jets.at(*(jet_is.begin()+2))+ jets.at(*(jet_is.begin()+3)));
+      double mass_diff = std::abs(vec_one.M()-vec_two.M());
       if ( mass_diff < min_v) {
         min_v = mass_diff; 
         min_is.clear();
-        if (mass_one > mass_two) {
-          min_is.insert(min_is.begin(), jet_is.begin(), jet_is.end());
+        if (pt_order) {
+          if (vec_one.pt() > vec_two.pt()) {
+            min_is.insert(min_is.begin(), jet_is.begin(), jet_is.end());
+          } else {
+            min_is.insert(min_is.begin(), jet_is.begin()+2, jet_is.begin()+4);
+            min_is.insert(min_is.begin()+2, jet_is.begin(), jet_is.begin()+2);
+            min_is.insert(min_is.begin()+4, jet_is.begin()+4, jet_is.end());
+          }
         } else {
-          min_is.insert(min_is.begin(), jet_is.begin()+2, jet_is.begin()+4);
-          min_is.insert(min_is.begin()+2, jet_is.begin(), jet_is.begin()+2);
-          min_is.insert(min_is.begin()+4, jet_is.begin()+4, jet_is.end());
-        }
+          if (vec_one.M() > vec_two.M()) {
+            min_is.insert(min_is.begin(), jet_is.begin(), jet_is.end());
+          } else {
+            min_is.insert(min_is.begin(), jet_is.begin()+2, jet_is.begin()+4);
+            min_is.insert(min_is.begin()+2, jet_is.begin(), jet_is.begin()+2);
+            min_is.insert(min_is.begin()+4, jet_is.begin()+4, jet_is.end());
+          }
+        } 
       }
       return false;
   	});
@@ -66,7 +76,8 @@ inline void dijet_pairing_simple (std::vector<mut::Jet> & jets,
  
 inline std::vector<std::size_t> dijet_pairing_better(std::vector<mut::Jet> & jets,
                                  std::string disc, double d_value,
-                                 std::size_t n_min_disc, std::size_t n_pass_disc) {
+                                 std::size_t n_min_disc, std::size_t n_pass_disc,
+                                 bool pt_order) {
 
     typedef std::vector<std::size_t>::iterator It;
 
@@ -91,20 +102,30 @@ inline std::vector<std::size_t> dijet_pairing_better(std::vector<mut::Jet> & jet
       	for_each_combination(jet_is.begin(), jet_is.begin()+2, 
                              jet_is.begin()+3, [&](It fiii, It liii) -> bool {
           // this could be done faster with VectorUtil function                   
-  				double mass_one = (jets.at(*jet_is.begin())+ jets.at(*(jet_is.begin()+1))).M();
-  				double mass_two = (jets.at(*(jet_is.begin()+2))+ jets.at(*(jet_is.begin()+3))).M();
-          double mass_diff = std::abs(mass_one-mass_two);
+       		auto vec_one = (jets.at(*jet_is.begin())+ jets.at(*(jet_is.begin()+1)));
+      		auto vec_two = (jets.at(*(jet_is.begin()+2))+ jets.at(*(jet_is.begin()+3)));
+          double mass_diff = std::abs(vec_one.M()-vec_two.M());
           if ( mass_diff < min_v) {
             tag_is = tag_is_t;
             min_v = mass_diff; 
             min_is.clear();
-            if (mass_one > mass_two) {
-              min_is.insert(min_is.begin(), jet_is.begin(), jet_is.end());
+            if (pt_order) {
+              if (vec_one.pt() > vec_two.pt()) {
+                min_is.insert(min_is.begin(), jet_is.begin(), jet_is.end());
+              } else {
+                min_is.insert(min_is.begin(), jet_is.begin()+2, jet_is.begin()+4);
+                min_is.insert(min_is.begin()+2, jet_is.begin(), jet_is.begin()+2);
+                min_is.insert(min_is.begin()+4, jet_is.begin()+4, jet_is.end());
+              }
             } else {
-              min_is.insert(min_is.begin(), jet_is.begin()+2, jet_is.begin()+4);
-              min_is.insert(min_is.begin()+2, jet_is.begin(), jet_is.begin()+2);
-              min_is.insert(min_is.begin()+4, jet_is.begin()+4, jet_is.end());
-            }
+              if (vec_one.M() > vec_two.M()) {
+                min_is.insert(min_is.begin(), jet_is.begin(), jet_is.end());
+              } else {
+                min_is.insert(min_is.begin(), jet_is.begin()+2, jet_is.begin()+4);
+                min_is.insert(min_is.begin()+2, jet_is.begin(), jet_is.begin()+2);
+                min_is.insert(min_is.begin()+4, jet_is.begin()+4, jet_is.end());
+              }
+            } 
           }
           return false;
        	});
@@ -149,15 +170,17 @@ template <class EventClass> class DiJetPairSelection : public BaseOperator<Event
 
     typedef std::vector<std::size_t>::iterator It;
     std::size_t n_fix_jets_;
+    bool pt_order_ = true;
 
 
-    DiJetPairSelection( std::size_t n_fix_jets = 3  ) :
-    n_fix_jets_(n_fix_jets) {}
+    DiJetPairSelection( std::size_t n_fix_jets = 3, bool pt_order = true  ) :
+    n_fix_jets_(n_fix_jets),
+    pt_order_(pt_order) {}
     virtual ~DiJetPairSelection() {}
 
     virtual bool process( EventClass & ev ) {
 
-      dijet_pairing_simple(ev.jets_, n_fix_jets_);        
+      dijet_pairing_simple(ev.jets_, n_fix_jets_, pt_order_);        
 
       // fill dijet objects
       ev.higgs_.clear();
@@ -196,12 +219,15 @@ template <class EventClass> class BetterDiJetPairSelection : public BaseOperator
     std::string disc_;
     double d_value_;
     std::size_t n_min_disc_;
+    bool pt_order_;
 
 
-    BetterDiJetPairSelection( std::string disc, double d_value, std::size_t n_min_disc = 3  ) :
+    BetterDiJetPairSelection( std::string disc, double d_value, std::size_t n_min_disc = 3,
+      bool pt_order = true  ) :
     	disc_(disc),
     	d_value_(d_value),
-    	n_min_disc_(n_min_disc) {}
+    	n_min_disc_(n_min_disc),
+      pt_order_(pt_order)  {}
     virtual ~BetterDiJetPairSelection() {}
 
     virtual bool process( EventClass & ev ) {
@@ -220,7 +246,7 @@ template <class EventClass> class BetterDiJetPairSelection : public BaseOperator
       if ( n_pass_disc < n_min_disc_) return false;
 
       // return index of free jets
-      ev.free_is_ = dijet_pairing_better(ev.jets_, disc_, d_value_, n_min_disc_, n_pass_disc);
+      ev.free_is_ = dijet_pairing_better(ev.jets_, disc_, d_value_, n_min_disc_, n_pass_disc, pt_order_);
       
       // fill dijet objects
       ev.higgs_.clear();
